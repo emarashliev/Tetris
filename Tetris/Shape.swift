@@ -120,7 +120,7 @@ class Shape: Hashable, Printable {
         if let blockRowColumnTranslation: Array<(columnDiff: Int, rowDiff: Int)> = blockRowColumnPositions[orientation] {
             for (idx, (columnDiff: Int, rowDiff: Int)) in enumerate(blockRowColumnTranslation) {
                 blocks[idx].column = column + columnDiff
-                blocks[idx].row = row
+                blocks[idx].row = row + rowDiff
             }
         }
     }

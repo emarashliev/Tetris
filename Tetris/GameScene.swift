@@ -93,21 +93,18 @@ class GameScene: SKScene {
     func addPreviewShapeToScene(shape:Shape, completion:() -> ()) {
         
         for (idx, block) in enumerate(shape.blocks) {
-            // #4
             var texture = textureCache[block.spriteName]
             if texture == nil {
                 texture = SKTexture(imageNamed: block.spriteName)
                 textureCache[block.spriteName] = texture
             }
             let sprite = SKSpriteNode(texture: texture)
-            // #5
             sprite.position = pointForColumn(block.column, row:block.row - 2)
             shapeLayer.addChild(sprite)
             block.sprite = sprite
             
             // Animation
             sprite.alpha = 0
-            // #6
             let moveAction = SKAction.moveTo(pointForColumn(block.column, row: block.row), duration: NSTimeInterval(0.2))
             moveAction.timingMode = .EaseOut
             let fadeInAction = SKAction.fadeAlphaTo(0.7, duration: 0.4)
