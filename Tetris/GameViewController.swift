@@ -17,6 +17,9 @@ class GameViewController: UIViewController, TetrisDelegate, UIGestureRecognizerD
     
     var panPointReference:CGPoint?
     
+    @IBOutlet weak var levelLabel: UILabel!
+    @IBOutlet weak var scoreLabel: UILabel!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,6 +117,11 @@ class GameViewController: UIViewController, TetrisDelegate, UIGestureRecognizerD
     
     
     func gameDidBegin(tetris: Tetris) {
+        
+        levelLabel.text = "\(tetris.level)"
+        scoreLabel.text = "\(tetris.score)"
+        scene.tickLengthMillis = TickLengthLevelOne
+        
         // The following is false when restarting a new game
         if tetris.nextShape != nil && tetris.nextShape!.blocks[0].sprite == nil {
             scene.addPreviewShapeToScene(tetris.nextShape!) {
@@ -129,26 +137,52 @@ class GameViewController: UIViewController, TetrisDelegate, UIGestureRecognizerD
         
         view.userInteractionEnabled = false
         scene.stopTicking()
+        
+        scene.playSound("gameover.mp3")
+        scene.animateCollapsingLines(tetris.removeAllBlocks(), fallenBlocks: Array<Array<Block>>()) {
+            tetris.beginGame()
+        }
     }
     
     
     func gameDidLevelUp(tetris: Tetris) {
         
+        levelLabel.text = "\(tetris.level)"
+        if scene.tickLengthMillis >= 100 {
+            scene.tickLengthMillis -= 100
+        } else if scene.tickLengthMillis > 50 {
+            scene.tickLengthMillis -= 50
+        }
+        scene.playSound("levelup.mp3")
     }
     
     
     func gameShapeDidDrop(tetris: Tetris) {
+        
         scene.stopTicking()
         scene.redrawShape(tetris.fallingShape!) {
             tetris.letShapeFall()
         }
+        scene.playSound("drop.mp3")
     }
     
     
     func gameShapeDidLand(tetris: Tetris) {
         
         scene.stopTicking()
-        nextShape()
+        self.view.userInteractionEnabled = false
+        
+        let removedLines = tetris.removeCompletedLines()
+        if removedLines.linesRemoved.count > 0 {
+            self.scoreLabel.text = "\(tetris.score)"
+            scene.animateCollapsingLines(removedLines.linesRemoved, fallenBlocks:removedLines.fallenBlocks) {
+                
+                self.gameShapeDidLand(tetris)
+            }
+            scene.playSound("bomb.mp3")
+        } else {
+            nextShape()
+        }
     }
     
     
